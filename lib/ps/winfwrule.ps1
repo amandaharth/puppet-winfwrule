@@ -96,7 +96,9 @@ function create {
         $Params.Add("LocalPort", $LocalPort)
     }
 
-    if ($Package) {
+    if ($Package -eq 'notconfigured') {
+        $Params.Add("Package", "")
+    } else {
         $Params.Add("Package", $Package)
     }
 
