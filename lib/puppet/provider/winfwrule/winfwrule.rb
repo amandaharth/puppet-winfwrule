@@ -54,7 +54,7 @@ class Puppet::Provider::Winfwrule::Winfwrule < Puppet::ResourceApi::SimpleProvid
     # Custom set method so we can pass and show more information about what we are deleting/disabling
     def set(context, changes)
         namevars = context.type.namevars
-
+  
         changes.each do |name, change|
             is = if context.type.feature?('simple_get_filter')
                     change.key?(:is) ? change[:is] : (get(context, [name]) || []).find { |r| SimpleProvider.build_name(namevars, r) == name }
@@ -62,14 +62,14 @@ class Puppet::Provider::Winfwrule::Winfwrule < Puppet::ResourceApi::SimpleProvid
                     change.key?(:is) ? change[:is] : (get(context) || []).find { |r| SimpleProvider.build_name(namevars, r) == name }
                 end
             context.type.check_schema(is) unless change.key?(:is)
-
+  
             should = change[:should]
-
+  
             raise 'SimpleProvider cannot be used with a Type that is not ensurable' unless context.type.ensurable?
-
+  
             is_ensure = is.nil? ? 'absent' : is[:ensure].to_s
             should_ensure = should.nil? ? 'absent' : should[:ensure].to_s
-
+  
             name_hash = if namevars.length > 1
                             # pass a name_hash containing the values of all namevars
                             name_hash = {}
@@ -80,7 +80,7 @@ class Puppet::Provider::Winfwrule::Winfwrule < Puppet::ResourceApi::SimpleProvid
                         else
                             name
                         end
-
+  
             if is_ensure == 'absent' && should_ensure == 'present'
                 context.creating(name) do
                     create(context, name_hash, should)
@@ -88,7 +88,7 @@ class Puppet::Provider::Winfwrule::Winfwrule < Puppet::ResourceApi::SimpleProvid
             elsif is_ensure == 'present' && should_ensure == 'absent'
                 context.deleting(name) do
                     # Customised: log the details of the rule that will be disabled
-                    Puppet.info("Disabling rule '#{change.dig(:is, :name)}' which had the configuration: #{change.dig(:is)}")
+                    Puppet.notice("Disabling rule '#{change.dig(:is, :name)}' which had the configuration: #{change.dig(:is)}")
                     delete(context, name_hash)
                 end
             elsif is_ensure == 'present'
@@ -102,8 +102,17 @@ class Puppet::Provider::Winfwrule::Winfwrule < Puppet::ResourceApi::SimpleProvid
     def canonicalize(context, resources)
         resources.each do | r |
             r.each do | k, v | 
-                if r[:"#{k}"].kind_of?(Array)
-                    r[:"#{k}"] = r[:"#{k}"].sort_by{ |w| [w.downcase, w] }
+                if ['name', 'title'].include?(k.to_s)
+                    # make name and title uppercase
+                    r[:"#{k}"] = r[:"#{k}"].upcase
+                elsif ['description', 'display_name'].include?(k.to_s)
+                    # do nothing to description and display_name, pass through as-is
+                elsif r[:"#{k}"].kind_of?(Array)
+                    # convert array elements to lowercase and then sort them
+                    r[:"#{k}"] = r[:"#{k}"].map(&:downcase).sort
+                else
+                    # make anything else lowercase
+                    r[:"#{k}"] = r[:"#{k}"].downcase
                 end
             end
         end

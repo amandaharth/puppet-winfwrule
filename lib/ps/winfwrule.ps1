@@ -19,6 +19,7 @@ param(
 )
 
 function get {
+    
     if ([string]::IsNullOrEmpty($Name)) {
         # We only care to know about rules that are Enabled on the system, so limit the Get call to rules where Enabled is True
         $rules = Get-NetFirewallRule -Enabled True
@@ -38,28 +39,30 @@ function get {
 
         $rules_collection += [PSCustomObject]@{
                                 ensure = 'present'
-                                name = $rule.InstanceID
-                                action = $rule.Action.ToString()
+                                name = $rule.InstanceID.ToUpper()
+                                action = $rule.Action.ToString().ToLower()
                                 description = $rule.Description
-                                direction = $rule.Direction.ToString()
+                                direction = $rule.Direction.ToString().ToLower()
                                 display_name = $rule.DisplayName
-                                icmp_type = @($port_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object -ExpandProperty IcmpType | Sort-Object)
-                                local_address = @($addr_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object -ExpandProperty LocalAddress | Sort-Object)
-                                local_port = @($port_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object -ExpandProperty LocalPort | Sort-Object)
-                                firewall_profile = @($rule.Profile.ToString().Split(',').Trim() | Sort-Object)
-                                remote_address = @($addr_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object -ExpandProperty RemoteAddress | Sort-Object)
-                                remote_port = @($port_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object -ExpandProperty RemotePort | Sort-Object)
-                                package = $app_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object @{n='Package'; e={ if ([string]::IsNullOrEmpty($_.Package)) {"NotConfigured"} else {$_.Package}}} | Select-Object -expandproperty Package
-                                program = $app_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object -ExpandProperty Program
-                                protocol = ($port_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object -ExpandProperty Protocol).ToString()
-                                service = $service_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object -ExpandProperty Service
+                                icmp_type = @($port_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object @{n='IcmpType'; e={$_.IcmpType.ToLower()}} | Select-Object -ExpandProperty IcmpType | Sort-Object)
+                                local_address = @($addr_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object @{n='LocalAddress'; e={$_.LocalAddress.ToLower()}} | Select-Object -ExpandProperty LocalAddress | Sort-Object)
+                                local_port = @($port_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object @{n='LocalPort'; e={$_.LocalPort.ToLower()}} | Select-Object -ExpandProperty LocalPort | Sort-Object)
+                                firewall_profile = @($rule.Profile.ToString().ToLower().Split(',').Trim() | Sort-Object)
+                                remote_address = @($addr_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object @{n='RemoteAddress'; e={$_.RemoteAddress.ToLower()}} | Select-Object -ExpandProperty RemoteAddress | Sort-Object)
+                                remote_port = @($port_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object @{n='RemotePort'; e={$_.RemotePort.ToLower()}} | Select-Object -ExpandProperty RemotePort | Sort-Object)
+                                package = ($app_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object @{n='Package'; e={ if ([string]::IsNullOrEmpty($_.Package)) {"NotConfigured"} else {$_.Package}}} | Select-Object -expandproperty Package).ToLower()
+                                program = ($app_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object -ExpandProperty Program).ToLower()
+                                protocol = ($port_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object -ExpandProperty Protocol).ToString().ToLower()
+                                service = ($service_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object -ExpandProperty Service).ToLower()
                             } 
     }
 
     ConvertTo-Json @($rules_collection)
+
 }
 
 function create {
+
     $Params = @{
         Name = $Name;
         Direction = $Direction;
@@ -128,9 +131,11 @@ function create {
     } catch {
         throw "Failed to create $Name ($DisplayName) with parameters: $($Params.GetEnumerator() | Sort-Object Value | Format-Table | Out-String)"
     }
+
 }
 
 function update {
+
     $Params = @{
         Name = $Name;
         Direction = $Direction;
@@ -198,12 +203,13 @@ function update {
     } catch {
         throw "Failed to set description for $Name ($DisplayName) to: ""$Description"""
     }
+
 }
 
 function delete {
     # When a Purge/Delete is done by Puppet, the firewall rule is set to DISABLED in Windows Firewall. It is NOT deleted from the system.
     # This is by design.
-
+    
     Write-Host "Disabling $Name"
 
     try {
@@ -211,6 +217,7 @@ function delete {
     } catch {
         throw "Failed to disable $Name"
     }
+
 }
 
 function check_rule_safety {
@@ -218,6 +225,7 @@ function check_rule_safety {
 }
 
 switch ($PuppetAction) {
+
     "get" {
         get
     }
@@ -233,4 +241,5 @@ switch ($PuppetAction) {
     default {
         throw "Unhandled action specified, no action taken: $($PuppetAction)"
     }
+
 }
