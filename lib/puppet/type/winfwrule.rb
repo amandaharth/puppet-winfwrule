@@ -29,19 +29,19 @@ Puppet::ResourceApi.register_type(
             default:    'present',
         },
         name: {
-            type:       'String',
+            type:       'Pattern[/\A[a-zA-Z0-9\-\_\{\}]+\Z/]',
             desc:       'The unique instance ID of this firewall rule.',
             behaviour:  :namevar,
         },
         action: {
-            type:       'Enum["Block","Allow","NotConfigured"]',
+            type:       'Enum["block","allow"]',
             desc:       'The action this firewall rule should take.',
-            default:    'Allow'
+            default:    'allow'
         },
         direction: {
-            type:       'Enum["Inbound","Outbound"]',
+            type:       'Enum["inbound","outbound"]',
             desc:       'The direction of traffic this firewall rule manages.',
-            default:    'Inbound',
+            default:    'inbound',
         },
         description: {
             type:       'Optional[String]',
@@ -52,19 +52,19 @@ Puppet::ResourceApi.register_type(
             desc:       'The display name of this firewall rule.', 
         },
         firewall_profile: {
-            type:       'Variant[Enum["Any","Domain","Private","Public","NotApplicable"], Array[Enum["Any","Domain","Private","Public","NotApplicable"]]]',
+            type:       'Variant[Enum["any","domain","private","public","notapplicable"], Array[Enum["any","domain","private","public","notapplicable"]]]',
             desc:       'The profile this firewall rule applies to.',
-            default:    ['Domain', 'Private', 'Public'],
+            default:    ['domain', 'private', 'public'],
         },
         icmp_type: {
             type:       'Array[String]',
             desc:       'The ICMP type this firewall rule affects.',
-            default:    ['Any'],
+            default:    ['any'],
         },
         local_address: {
             type:       'Variant[String, Stdlib::IP::Address, Stdlib::IP::Address::V6::Compressed, Array[Variant[Stdlib::IP::Address, Stdlib::IP::Address::V6::Compressed, String]]]',
             desc:       'The local address this firewall rule affects.',
-            default:    ['Any'],
+            default:    ['any'],
         },
         local_port: {
             type:       'Variant[String, Stdlib::Port, Array[Variant[Stdlib::Port, String]], Pattern[/\A[1-9]{1}\Z|[1-9]{1}[0-9,-]*[0-9]{1}\Z/]]',
@@ -77,7 +77,7 @@ Puppet::ResourceApi.register_type(
         program: {
             type:       'String',
             desc:       'The program this firewall rule affects.',
-            default:    'Any',
+            default:    'any',
         },
         protocol: {
             type:       'String',
@@ -86,17 +86,17 @@ Puppet::ResourceApi.register_type(
         remote_address: {
             type:       'Variant[String, Stdlib::IP::Address, Stdlib::IP::Address::V6::Compressed, Array[Variant[Stdlib::IP::Address, Stdlib::IP::Address::V6::Compressed, String]]]',
             desc:       'The remote address this firewall rule affects.',
-            default:    ['Any'],
+            default:    ['any'],
         },
         remote_port: {
             type:       'Variant[String, Stdlib::Port, Array[Variant[Stdlib::Port, String]], Pattern[/\A[1-9]{1}\Z|[1-9]{1}[0-9,-]*[0-9]{1}\Z/]]',
             desc:       'The remote port this firewall rule affects.',
-            default:    ['Any'],
+            default:    ['any'],
         },
         service: {
             type:       'String',
             desc:       'The service this firewall rule affects.',
-            default:    'Any',
+            default:    'any',
         },
     },
 )
