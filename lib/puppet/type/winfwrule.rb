@@ -71,8 +71,9 @@ Puppet::ResourceApi.register_type(
             desc:       'The local port this firewall rule manages.',
         },
         package: {
-            type:       'Optional[String]',
+            type:       'String',
             desc:       'The package this firewall rule affects.',
+            default:    'notconfigured'
         },
         program: {
             type:       'String',
