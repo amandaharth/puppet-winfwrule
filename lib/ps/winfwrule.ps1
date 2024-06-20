@@ -50,7 +50,7 @@ function get {
                                 firewall_profile = @($rule.Profile.ToString().ToLower().Split(',').Trim() | Sort-Object)
                                 remote_address = @($addr_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object @{n='RemoteAddress'; e={$_.RemoteAddress.ToLower()}} | Select-Object -ExpandProperty RemoteAddress | Sort-Object)
                                 remote_port = @($port_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object @{n='RemotePort'; e={$_.RemotePort.ToLower()}} | Select-Object -ExpandProperty RemotePort | Sort-Object)
-                                package = ($app_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object @{n='Package'; e={ if ([string]::IsNullOrEmpty($_.Package)) {"NotConfigured"} else {$_.Package}}} | Select-Object -expandproperty Package).ToLower()
+                                package = ($app_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object @{n='Package'; e={ if ([string]::IsNullOrEmpty($_.Package)) {"notconfigured"} else {$_.Package}}} | Select-Object -expandproperty Package)
                                 program = ($app_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object -ExpandProperty Program).ToLower()
                                 protocol = ($port_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object -ExpandProperty Protocol).ToString().ToLower()
                                 service = ($service_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object -ExpandProperty Service).ToLower()
@@ -162,7 +162,9 @@ function update {
         $Params.Add("LocalPort", $LocalPort)
     }
 
-    if ($Package) {
+    if ($Package -eq 'notconfigured') {
+        $Params.Add("Package", "")
+    } else {
         $Params.Add("Package", $Package)
     }
 
