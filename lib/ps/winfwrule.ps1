@@ -22,12 +22,11 @@ function get {
     
     if ([string]::IsNullOrEmpty($Name)) {
         # We only care to know about rules that are Enabled on the system, so limit the Get call to rules where Enabled is True
-        $rules = Get-NetFirewallRule -Enabled True
+        $rules = Get-NetFirewallRule -Enabled True -ErrorAction SilentlyContinue
     } else {
-        $rules = Get-NetFirewallRule -Name $Name | Where-Object Enabled -eq True
+        $rules = Get-NetFirewallRule -Name $Name -ErrorAction SilentlyContinue | Where-Object Enabled -eq True 
     }
 
-    
     $addr_filter = Get-NetFirewallAddressFilter
     $app_filter = Get-NetFirewallApplicationFilter
     $port_filter = Get-NetFirewallPortFilter
