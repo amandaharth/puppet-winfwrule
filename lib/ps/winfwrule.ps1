@@ -10,7 +10,6 @@ param(
     [String[]] $IcmpType,
     [String[]] $LocalAddress,
     [String[]] $LocalPort,
-    [String] $Package,
     [String] $Program,
     [String] $Protocol,
     [String] $Service,
@@ -49,7 +48,6 @@ function get {
                                 firewall_profile = @($rule.Profile.ToString().ToLower().Split(',').Trim() | Sort-Object)
                                 remote_address = @($addr_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object @{n='RemoteAddress'; e={$_.RemoteAddress.ToLower()}} | Select-Object -ExpandProperty RemoteAddress | Sort-Object)
                                 remote_port = @($port_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object @{n='RemotePort'; e={$_.RemotePort.ToLower()}} | Select-Object -ExpandProperty RemotePort | Sort-Object)
-                                package = ($app_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object @{n='Package'; e={ if ([string]::IsNullOrEmpty($_.Package)) {"notconfigured"} else {$_.Package}}} | Select-Object -expandproperty Package)
                                 program = ($app_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object -ExpandProperty Program).ToLower()
                                 protocol = ($port_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object -ExpandProperty Protocol).ToString().ToLower()
                                 service = ($service_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object -ExpandProperty Service).ToLower()
@@ -94,10 +92,6 @@ function create {
 
     if ($LocalPort) {
         $Params.Add("LocalPort", $LocalPort)
-    }
-
-    if ($Package -ne 'notconfigured') {
-        $Params.Add("Package", $Package)
     }
 
     if ($Program) {
@@ -159,10 +153,6 @@ function update {
 
     if ($LocalPort) {
         $Params.Add("LocalPort", $LocalPort)
-    }
-
-    if ($Package -ne 'notconfigured') {
-        $Params.Add("Package", $Package)
     }
 
     if ($Program) {
