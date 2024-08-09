@@ -105,8 +105,8 @@ class Puppet::Provider::Winfwrule::Winfwrule < Puppet::ResourceApi::SimpleProvid
                 if ['name', 'title'].include?(k.to_s)
                     # make name and title uppercase
                     r[:"#{k}"] = r[:"#{k}"].upcase
-                elsif ['description', 'display_name', 'package'].include?(k.to_s)
-                    # do nothing to description, display_name and package, pass through as-is
+                elsif ['description', 'display_name'].include?(k.to_s)
+                    # do nothing to description or display_name, pass through as-is
                 elsif r[:"#{k}"].kind_of?(Array)
                     # convert array elements to lowercase and then sort them
                     r[:"#{k}"] = r[:"#{k}"].map(&:downcase).sort
