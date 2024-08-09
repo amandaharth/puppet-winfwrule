@@ -70,11 +70,6 @@ Puppet::ResourceApi.register_type(
             type:       'Variant[String, Stdlib::Port, Array[Variant[Stdlib::Port, String]], Pattern[/\A[1-9]{1}\Z|[1-9]{1}[0-9,-]*[0-9]{1}\Z/]]',
             desc:       'The local port this firewall rule manages.',
         },
-        package: {
-            type:       'String',
-            desc:       'The package this firewall rule affects.',
-            default:    'notconfigured'
-        },
         program: {
             type:       'String',
             desc:       'The program this firewall rule affects.',
