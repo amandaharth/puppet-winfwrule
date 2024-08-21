@@ -209,6 +209,38 @@ function delete {
 
 }
 
+function Convert-SubnetMask {
+    <#
+    .DESCRIPTION
+        Convert a subnet mask to CIDR prefix length
+    .EXAMPLE
+        This example calculates the prefix length of 255.255.254.0 netmask:
+        PS C:\Windows\system32> Convert-SubnetMask -SubnetMask 255.255.254.0
+		23       
+    #>
+    param (
+        # Subnet mask to convert, provided in 255.255.255.0 form
+        [Parameter(ValueFromPipeline)]
+        [String]$SubnetMask
+    )
+
+    $binaryForm = ""
+
+    # Convert each mask octet to binary and combine into 1 string
+    $SubnetMask.split(".") | ForEach-Object { $binaryForm += [Convert]::ToString($_, 2).PadLeft(8, '0') }
+
+    if ($binaryForm -match "0") {
+	    # Return the index of the first 0 found in the binary string, if there is a 0 present
+        $prefixLength = $binaryForm.IndexOf('0')
+    }
+    else {
+	    # Count the number of bits/"1"s to get the prefix length
+        $prefixLength = ([regex]::Matches($binaryForm, "1" )).Count
+    }
+    return $prefixLength
+    
+}
+
 function check_rule_safety {
     # NEED TO SAFEGUARD AGAINST CREATING ANY:ANY RULES
 }
