@@ -43,10 +43,10 @@ function get {
                                 direction = $rule.Direction.ToString().ToLower()
                                 display_name = $rule.DisplayName
                                 icmp_type = @($port_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object @{n='IcmpType'; e={$_.IcmpType.ToLower()}} | Select-Object -ExpandProperty IcmpType | Sort-Object)
-                                local_address = @($addr_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object @{n='LocalAddress'; e={$_.LocalAddress.ToLower()}} | Select-Object -ExpandProperty LocalAddress | Sort-Object)
+                                local_address = @($addr_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object @{n='LocalAddress'; e={$_.LocalAddress.ToLower()}} | Select-Object -ExpandProperty LocalAddress | Sort-Object | ForEach-Object { if($_ -match "\/\d+\.\d+\.\d+\.\d+$") { $_ -replace $_.substring($_.IndexOf("/")+1 ),($_.substring($_.IndexOf("/")+1 ) | Convert-SubnetMask) } else { $_ }) 
                                 local_port = @($port_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object @{n='LocalPort'; e={$_.LocalPort.ToLower()}} | Select-Object -ExpandProperty LocalPort | Sort-Object)
                                 firewall_profile = @($rule.Profile.ToString().ToLower().Split(',').Trim() | Sort-Object)
-                                remote_address = @($addr_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object @{n='RemoteAddress'; e={$_.RemoteAddress.ToLower()}} | Select-Object -ExpandProperty RemoteAddress | Sort-Object)
+                                remote_address = @($addr_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object @{n='RemoteAddress'; e={$_.RemoteAddress.ToLower()}} | Select-Object -ExpandProperty RemoteAddress | Sort-Object | ForEach-Object { if($_ -match "\/\d+\.\d+\.\d+\.\d+$") { $_ -replace $_.substring($_.IndexOf("/")+1 ),($_.substring($_.IndexOf("/")+1 ) | Convert-SubnetMask) } else { $_ }) 
                                 remote_port = @($port_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object @{n='RemotePort'; e={$_.RemotePort.ToLower()}} | Select-Object -ExpandProperty RemotePort | Sort-Object)
                                 program = ($app_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object -ExpandProperty Program).ToLower()
                                 protocol = ($port_filter | Where-Object InstanceID -eq $rule.InstanceID | Select-Object -ExpandProperty Protocol).ToString().ToLower()
@@ -230,11 +230,11 @@ function Convert-SubnetMask {
     $SubnetMask.split(".") | ForEach-Object { $binaryForm += [Convert]::ToString($_, 2).PadLeft(8, '0') }
 
     if ($binaryForm -match "0") {
-	    # Return the index of the first 0 found in the binary string, if there is a 0 present
+	# Return the index of the first 0 found in the binary string, if there is a 0 present
         $prefixLength = $binaryForm.IndexOf('0')
     }
     else {
-	    # Count the number of bits/"1"s to get the prefix length
+	# Count the number of bits/"1"s to get the prefix length
         $prefixLength = ([regex]::Matches($binaryForm, "1" )).Count
     }
     return $prefixLength
