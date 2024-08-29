@@ -15,7 +15,7 @@
 # This is by design.
 
 begin
-  require 'C:/Program Files/Puppet Labs/Puppet/puppet/lib/ruby/vendor_gems/gems/latest/puppet-resource_api-1.9.0/lib/puppet/resource_api'
+  require 'C:/Program Files/Puppet Labs/Puppet/puppet/lib/ruby/vendor_gems/gems/latest/gems/puppet-resource_api-1.9.0/lib/puppet/resource_api'
 rescue LoadError
   require 'puppet/resource_api'
 end
