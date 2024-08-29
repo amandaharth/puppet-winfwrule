@@ -14,7 +14,11 @@
 # When a Purge/Delete is done by Puppet, the firewall rule is set to DISABLED in Windows Firewall. It is NOT deleted from the system.
 # This is by design.
 
-require 'C:/Program Files/Puppet Labs/Puppet/puppet/lib/ruby/vendor_gems/gems/latest/puppet-resource_api-1.9.0/lib/puppet/resource_api'
+begin
+  require 'C:/Program Files/Puppet Labs/Puppet/puppet/lib/ruby/vendor_gems/gems/latest/puppet-resource_api-1.9.0/lib/puppet/resource_api'
+rescue LoadError
+  require 'puppet/resource_api'
+end
 
 Puppet::ResourceApi.register_type(
     name: 'winfwrule',
