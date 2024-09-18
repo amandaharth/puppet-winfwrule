@@ -5,28 +5,48 @@
 # This is by design.
 
 require 'puppet/resource_api/simple_provider'
+require 'ruby-pwsh'
 
 # Implementation for the Winfwrule type using the Resource API.
 class Puppet::Provider::Winfwrule::Winfwrule < Puppet::ResourceApi::SimpleProvider 
     SCRIPT_PATH = 'ps/winfwrule.ps1' unless const_defined?(:SCRIPT_PATH)
 
+    def ps_manager
+        debug_output = Puppet::Util::Log.level == :debug
+        Pwsh::Manager.instance(Pwsh::Manager.powershell_path,Pwsh::Manager.powershell_args, debug: debug_output)
+    end
+
+    def invoke_command(command)
+        result = ps_manager.execute(command)
+        raise result[:errormessage] unless result[:exitcode].zero?
+        result
+    end
+
     def get(context)
-        JSON.parse(Puppet::Util::Execution.execute(['powershell.exe', '-ExecutionPolicy', 'Bypass', '-File', File.join(Puppet.settings[:libdir], SCRIPT_PATH), '-PuppetAction','get']), symbolize_names: true)
+        command = "#{File.join(Puppet.settings[:libdir], SCRIPT_PATH)} -PuppetAction get"
+        result = invoke_command(command)
+        Pwsh::Util.symbolize_hash_keys(JSON.parse(result[:stdout]))
     end
 
     def create(context, name, should)
-        output = Puppet::Util::Execution.execute(['powershell.exe', '-ExecutionPolicy', 'Bypass', '-Command', File.join(Puppet.settings[:libdir], SCRIPT_PATH), '-PuppetAction','create', format_powershell_args(should)])
-        Puppet.debug output
+        command = "#{File.join(Puppet.settings[:libdir], SCRIPT_PATH)} -PuppetAction create #{format_powershell_args(should).join(" ")}"
+        result = invoke_command(command)
+        Puppet.debug command
+        Puppet.debug result[:stdout]
     end
 
     def update(context, name, should)
-        output = Puppet::Util::Execution.execute(['powershell.exe', '-ExecutionPolicy', 'Bypass', '-Command', File.join(Puppet.settings[:libdir], SCRIPT_PATH), '-PuppetAction','update', format_powershell_args(should)])
-        Puppet.debug output
+        command = "#{File.join(Puppet.settings[:libdir], SCRIPT_PATH)} -PuppetAction update #{format_powershell_args(should).join(" ")}"
+        result = invoke_command(command)
+        Puppet.debug command
+        Puppet.debug result[:stdout]
     end
 
     def delete(context, name)
-        output = Puppet::Util::Execution.execute(['powershell.exe', '-ExecutionPolicy', 'Bypass', '-Command', File.join(Puppet.settings[:libdir], SCRIPT_PATH), '-PuppetAction','delete', '-Name', "'#{name.gsub(/'/,"''")}'"])
-        Puppet.debug output
+        command = "#{File.join(Puppet.settings[:libdir], SCRIPT_PATH)} -PuppetAction delete -Name '#{name.gsub(/'/,"''")}'"
+        result = invoke_command(command)
+        Puppet.debug command
+        Puppet.debug result[:stdout]
     end
 
     def format_powershell_args(should)
