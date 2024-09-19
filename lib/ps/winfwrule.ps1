@@ -123,6 +123,7 @@ function create {
         update
     } catch {
         throw "Failed to create $Name ($DisplayName) with parameters: $($Params.GetEnumerator() | Sort-Object Value | Format-Table | Out-String)"
+        exit 1
     }
 
 }
@@ -181,6 +182,7 @@ function update {
         Set-NetFirewallRule -Enabled True @Params -ErrorAction Stop
     } catch {
         throw "Failed to update $Name ($DisplayName) with parameters: $($Params.GetEnumerator() | Sort-Object Value | Format-Table | Out-String)"
+        exit 1
     }
 
     try {
@@ -191,6 +193,7 @@ function update {
         }
     } catch {
         throw "Failed to set description for $Name ($DisplayName) to: ""$Description"""
+        exit 1
     }
 
 }
@@ -205,6 +208,7 @@ function delete {
         Disable-NetFirewallRule -Name "$Name" -ErrorAction Stop
     } catch {
         throw "Failed to disable $Name"
+        exit 1
     }
 
 }
@@ -261,6 +265,7 @@ switch ($PuppetAction) {
     }
     default {
         throw "Unhandled action specified, no action taken: $($PuppetAction)"
+        exit 1
     }
 
 }
