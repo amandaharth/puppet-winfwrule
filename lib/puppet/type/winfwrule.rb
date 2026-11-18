@@ -29,7 +29,7 @@ Puppet::ResourceApi.register_type(
             default:    'present',
         },
         name: {
-            type:       'Pattern[/\A[a-zA-Z0-9\-\_\{\}]+\Z/]',
+            type:       'Pattern[/\A[a-zA-Z0-9._{}-]+\z/]',
             desc:       'The unique instance ID of this firewall rule.',
             behaviour:  :namevar,
         },
