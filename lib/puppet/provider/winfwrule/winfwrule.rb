@@ -62,9 +62,9 @@ class Puppet::Provider::Winfwrule::Winfwrule < Puppet::ResourceApi::SimpleProvid
             transformed_key = k.to_s.split('_').map(&:capitalize).join
             args << "-#{transformed_key}"
             if v.kind_of?(Array)
-                v = "@(#{v.map { | val | "'#{val}'" }.join(",")})"
+                v = "@(#{v.map { |val| "'#{val.to_s.gsub(/'/, "''")}'" }.join(",")})"
             else
-                v = "'#{v.gsub(/'/,"''")}'"
+                v = "'#{v.to_s.gsub(/'/, "''")}'"
             end
             args << "#{v}"
         end
